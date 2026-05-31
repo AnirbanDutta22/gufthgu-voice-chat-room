@@ -1,0 +1,264 @@
+@import "tailwindcss";
+
+/* Global Editorial Fonts */
+@import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&display=swap");
+
+/* ---------------- THEME ---------------- */
+@theme {
+  /* Brand & Accents */
+  --color-brand: #f59e0b; /* Persimmon / Rust */
+  --color-brand-hover: #c63d18;
+  --color-accent-dark: #1a312b; /* Deep Forest */
+
+  /* Surface & Background */
+  --color-surface-bg: #f5f4ef; /* Bone / Warm Cream */
+  --color-surface-card: #ffffff;
+  --color-surface-alt: #ebe9e0;
+
+  /* Text Colors */
+  --color-text-main: #141414; /* Soft Black */
+  --color-text-muted: #666666;
+  --color-text-subtle: #999999;
+
+  /* Fonts */
+  --font-display: "Instrument Serif", serif;
+  --font-body: "Manrope", sans-serif;
+
+  /* Layout */
+  --radius-xl: 1rem;
+  --radius-full: 9999px;
+}
+
+/* ---------------- KEYFRAMES ---------------- */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+@keyframes wave {
+  0%,
+  100% {
+    transform: scaleY(0.5);
+  }
+  50% {
+    transform: scaleY(1.5);
+  }
+}
+
+@utility font-display {
+  font-family: var(--font-display);
+}
+@utility font-body {
+  font-family: var(--font-body);
+}
+@utility scrollbar-none {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@layer base {
+  :root {
+    --bg-primary: #f5f4ef;
+    --text-primary: #141414;
+    --text-secondary: #666666;
+    --border-color: #141414;
+    --brand-primary: #e44e24;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: "Manrope", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  /* Elegant Light Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #141414;
+    border-radius: 10px;
+    opacity: 0.2;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #e44e24;
+  }
+
+  ::selection {
+    background: #e44e24;
+    color: #fff;
+  }
+}
+
+@layer components {
+  /* =========================================
+     GLOBAL APP COMPONENTS
+     ========================================= */
+
+  /* Buttons */
+  .btn-primary {
+    @apply px-8 py-3.5 rounded-full font-body font-semibold text-white transition-all duration-300;
+    background: #141414;
+    border: 1px solid #141414;
+  }
+
+  .btn-primary:hover {
+    background: var(--color-brand);
+    border-color: var(--color-brand);
+    transform: translateY(-2px);
+  }
+
+  .btn-secondary {
+    @apply px-8 py-3.5 rounded-full font-body font-semibold transition-all duration-300;
+    background: transparent;
+    color: #141414;
+    border: 1px solid #141414;
+  }
+
+  .btn-secondary:hover {
+    background: #141414;
+    color: #f5f4ef;
+  }
+
+  .btn-ghost {
+    @apply px-4 py-2 rounded-full font-body font-medium transition-all duration-200;
+    color: var(--text-secondary);
+  }
+
+  .btn-ghost:hover {
+    background: rgba(20, 20, 20, 0.05);
+    color: var(--text-primary);
+  }
+
+  /* Cards (Neo-brutalism / Editorial style) */
+  .card,
+  .room-card {
+    background: #ffffff;
+    border: 1px solid #141414;
+    border-radius: 20px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 4px 4px 0px rgba(20, 20, 20, 0.05);
+  }
+
+  .card:hover,
+  .room-card:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 8px 8px 0px rgba(20, 20, 20, 1);
+  }
+
+  /* Forms & Inputs */
+  .input-field {
+    @apply w-full px-4 py-3 rounded-xl text-sm font-body outline-none transition-all duration-200;
+    background: #ffffff;
+    border: 1px solid rgba(20, 20, 20, 0.2);
+    color: var(--text-primary);
+  }
+
+  .input-field::placeholder {
+    color: var(--text-secondary);
+  }
+
+  .input-field:focus {
+    border-color: var(--color-brand);
+    box-shadow: 0 0 0 3px rgba(228, 78, 36, 0.1);
+  }
+
+  /* Internal Dashboard Elements */
+  .sidebar-link {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-body font-semibold transition-all duration-200 cursor-pointer;
+    color: var(--text-secondary);
+  }
+
+  .sidebar-link:hover {
+    background: rgba(20, 20, 20, 0.04);
+    color: var(--text-primary);
+  }
+
+  .sidebar-link.active {
+    background: var(--color-brand);
+    color: #ffffff;
+  }
+
+  /* Audio Wave Animation inside App */
+  .audio-bar {
+    width: 3px;
+    border-radius: 3px;
+    background: var(--color-brand); /* Changed to Persimmon */
+    animation: wave 1.5s ease-in-out infinite;
+  }
+
+  .audio-bar:nth-child(1) {
+    animation-delay: 0s;
+    height: 12px;
+  }
+  .audio-bar:nth-child(2) {
+    animation-delay: 0.2s;
+    height: 20px;
+  }
+  .audio-bar:nth-child(3) {
+    animation-delay: 0.4s;
+    height: 14px;
+  }
+  .audio-bar:nth-child(4) {
+    animation-delay: 0.1s;
+    height: 22px;
+  }
+  .audio-bar:nth-child(5) {
+    animation-delay: 0.3s;
+    height: 10px;
+  }
+
+  /* Redesigned Glass for Light Theme (Used in Navbars/Modals) */
+  .glass {
+    background: rgba(245, 244, 239, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(20, 20, 20, 0.08);
+  }
+
+  /* Global Grain Background */
+  .noise-bg {
+    position: relative;
+  }
+
+  .noise-bg::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    opacity: 0.25;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 50;
+    mix-blend-mode: multiply;
+  }
+}
