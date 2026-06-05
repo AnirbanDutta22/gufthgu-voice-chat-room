@@ -32,35 +32,36 @@ const ContactStep = ({ onNext }) => {
 
   return (
     <div className="animate-slide-up">
-      <h2 className="font-display text-2xl font-bold text-surface-50 mb-1">
+      <h2 className="font-display text-2xl font-black tracking-tight text-text-main mb-1">
         Welcome back
       </h2>
-      <p className="text-surface-400 text-sm mb-8">
+      <p className="text-text-muted text-xs font-bold uppercase tracking-wider mb-6">
         Enter your phone or email to continue
       </p>
 
-      {/* Toggle */}
-      <div className="flex gap-2 p-1 glass rounded-xl mb-5">
+      {/* Brutalist Mode Toggle Switch Container */}
+      <div className="flex p-1 bg-surface-bg border-2 border-text-main rounded-xl mb-5 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
         {["email", "phone"].map((t) => (
           <button
             key={t}
+            type="button"
             onClick={() => {
               setType(t);
               setContact("");
               dispatch(clearError());
             }}
-            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm transition-all ${
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
               type === t
-                ? "bg-brand-600 text-white"
-                : "text-surface-400 hover:text-surface-200"
+                ? "bg-text-main text-white"
+                : "text-text-muted hover:text-text-main"
             }`}
           >
             {t === "email" ? (
-              <RiMailLine size={15} />
+              <RiMailLine size={14} />
             ) : (
-              <RiPhoneLine size={15} />
+              <RiPhoneLine size={14} />
             )}
-            {t === "email" ? "Email" : "Phone"}
+            <span>{t === "email" ? "Email" : "Phone"}</span>
           </button>
         ))}
       </div>
@@ -74,18 +75,22 @@ const ContactStep = ({ onNext }) => {
           dispatch(clearError());
         }}
         onKeyDown={(e) => e.key === "Enter" && handleSend()}
-        className="input-field mb-3"
+        className="input-field mb-3 focus:border-text-main placeholder:text-text-muted/40"
         autoFocus
       />
 
-      {error && <p className="text-red-400 text-xs mb-3">{error}</p>}
+      {error && (
+        <p className="text-red-600 font-mono font-bold text-xs mb-3 uppercase tracking-wide">
+          ⚠️ {error}
+        </p>
+      )}
 
       <button
         onClick={handleSend}
         disabled={loading || !contact.trim()}
-        className="btn-primary w-full py-3"
+        className="btn-primary w-full py-3.5 text-xs font-bold uppercase tracking-wider shadow-[3px_3px_0px_rgba(0,0,0,1)] disabled:opacity-40"
       >
-        {loading ? "Sending..." : "Send Code"}
+        {loading ? "Sending..." : "Send Verification Code"}
       </button>
     </div>
   );
@@ -151,19 +156,22 @@ const OtpStep = ({ onBack }) => {
           dispatch(resetOtp());
           onBack();
         }}
-        className="flex items-center gap-1 text-surface-400 hover:text-surface-200 text-sm mb-6 transition-colors"
+        className="flex items-center gap-1.5 text-text-muted hover:text-text-main text-xs font-bold uppercase tracking-wider mb-6 transition-colors"
       >
-        <RiArrowLeftLine size={16} /> Back
+        <RiArrowLeftLine size={14} /> Back to Terminal
       </button>
 
-      <h2 className="font-display text-2xl font-bold text-surface-50 mb-1">
+      <h2 className="font-display text-2xl font-black tracking-tight text-text-main mb-1">
         Check your {otpType}
       </h2>
-      <p className="text-surface-400 text-sm mb-8">
-        We sent a 6-digit code to{" "}
-        <span className="text-surface-200 font-500">{otpContact}</span>
+      <p className="text-text-muted text-xs font-medium mb-6">
+        We dispatched a 6-digit verification code directly to{" "}
+        <span className="text-text-main font-bold underline decoration-brand decoration-2">
+          {otpContact}
+        </span>
       </p>
 
+      {/* Grid of Inputs */}
       <div className="flex gap-2 mb-5">
         {otp.map((digit, i) => (
           <input
@@ -175,30 +183,34 @@ const OtpStep = ({ onBack }) => {
             value={digit}
             onChange={(e) => handleChange(i, e.target.value)}
             onKeyDown={(e) => handleKeyDown(i, e)}
-            className="w-full aspect-square text-center text-xl font-display font-bold input-field"
+            className="w-full aspect-square text-center text-xl font-display font-black input-field focus:border-text-main"
             autoFocus={i === 0}
           />
         ))}
       </div>
 
-      {error && <p className="text-red-400 text-xs mb-3">{error}</p>}
+      {error && (
+        <p className="text-red-600 font-mono font-bold text-xs mb-3 uppercase tracking-wide">
+          ⚠️ {error}
+        </p>
+      )}
 
       <button
         onClick={() => handleVerify(otp.join(""))}
         disabled={loading || otp.some((d) => !d)}
-        className="btn-primary w-full py-3 mb-4"
+        className="btn-primary w-full py-3.5 text-xs font-bold uppercase tracking-wider mb-4 shadow-[3px_3px_0px_rgba(0,0,0,1)] disabled:opacity-40"
       >
-        {loading ? "Verifying..." : "Verify Code"}
+        {loading ? "Authorizing Token..." : "Verify Identity Token"}
       </button>
 
-      <p className="text-center text-sm text-surface-500">
-        Didn't get it?{" "}
+      <p className="text-center text-xs font-bold uppercase tracking-wider text-text-muted">
+        Didn't receive it?{" "}
         <button
           onClick={handleResend}
           disabled={resendTimer > 0}
-          className={`font-500 transition-colors ${resendTimer > 0 ? "text-surface-600" : "text-brand-400 hover:text-brand-300"}`}
+          className={`underline transition-colors ${resendTimer > 0 ? "text-text-muted/50 cursor-not-allowed" : "text-brand hover:text-brand/80"}`}
         >
-          {resendTimer > 0 ? `Resend in ${resendTimer}s` : "Resend code"}
+          {resendTimer > 0 ? `Retry in ${resendTimer}s` : "Re-dispatch Code"}
         </button>
       </p>
     </div>
@@ -209,37 +221,20 @@ const AuthPage = () => {
   const [step, setStep] = useState("contact");
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center px-4"
-      style={{ background: "var(--bg-primary)" }}
-    >
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div
-          className="absolute top-1/3 left-1/3 w-96 h-96 rounded-full opacity-8 blur-3xl"
-          style={{
-            background: "radial-gradient(circle, #6272f3, transparent)",
-          }}
-        />
-        <div
-          className="absolute bottom-1/3 right-1/3 w-72 h-72 rounded-full opacity-6 blur-3xl"
-          style={{
-            background: "radial-gradient(circle, #a78bfa, transparent)",
-          }}
-        />
-      </div>
-
+    <div className="min-h-screen flex items-center justify-center bg-surface-bg px-4 py-12 selection:bg-brand selection:text-white">
       <div className="relative w-full max-w-sm">
-        {/* Logo */}
+        {/* Identity Unit Logo */}
         <div className="text-center mb-8">
-          <div className="w-12 h-12 rounded-2xl gradient-brand flex items-center justify-center mx-auto mb-3 shadow-glow animate-float">
-            <RiMicLine className="text-white" size={22} />
+          <div className="w-14 h-14 rounded-2xl bg-brand text-white flex items-center justify-center mx-auto mb-3 border-2 border-text-main shadow-[3px_3px_0px_rgba(0,0,0,1)]">
+            <RiMicLine size={24} />
           </div>
-          <span className="font-display font-bold text-xl text-surface-50">
-            gufthgu
+          <span className="font-display font-black text-2xl tracking-tight text-text-main">
+            gufthgu<span className="text-brand">.</span>
           </span>
         </div>
 
-        <div className="glass rounded-3xl p-8 border border-white/8">
+        {/* Dynamic Multi-Step Wrapper Card Frame */}
+        <div className="bg-surface-card rounded-3xl p-8 border-2 border-text-main shadow-[6px_6px_0px_rgba(0,0,0,1)]">
           {step === "contact" ? (
             <ContactStep onNext={() => setStep("otp")} />
           ) : (
@@ -247,8 +242,8 @@ const AuthPage = () => {
           )}
         </div>
 
-        <p className="text-center text-surface-600 text-xs mt-6">
-          By continuing, you agree to our Terms & Privacy Policy
+        <p className="text-center text-text-muted/60 font-medium text-[10px] uppercase tracking-widest mt-6">
+          By authentication, you agree to our System Terms & Policies.
         </p>
       </div>
     </div>

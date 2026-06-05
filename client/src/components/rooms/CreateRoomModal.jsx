@@ -8,9 +8,8 @@ import {
   RiRecordCircleLine,
 } from "react-icons/ri";
 import { createRoom } from "../../store/slices/roomSlice";
-import { TOPICS, ROOM_TYPES } from "../../constants";
+import { TOPICS } from "../../constants";
 import Modal from "../ui/Modal";
-import Tag from "../ui/Tag";
 import toast from "react-hot-toast";
 
 const ROOM_TYPE_OPTIONS = [
@@ -19,21 +18,18 @@ const ROOM_TYPE_OPTIONS = [
     label: "Public",
     desc: "Anyone can join",
     icon: <RiGlobalLine size={18} />,
-    color: "text-accent-mint",
   },
   {
     value: "social",
     label: "Social",
     desc: "Followers only",
     icon: <RiGroupLine size={18} />,
-    color: "text-accent-amber",
   },
   {
     value: "private",
     label: "Private",
     desc: "Invite only",
     icon: <RiLockLine size={18} />,
-    color: "text-accent-violet",
   },
 ];
 
@@ -73,142 +69,172 @@ const CreateRoomModal = ({ onClose }) => {
   };
 
   return (
-    <Modal isOpen onClose={onClose} title="Start a Room" size="lg">
-      <div className="space-y-5">
-        {/* Title */}
+    <Modal isOpen onClose={onClose} title="Initialize Room" size="lg">
+      <div className="space-y-6 text-text-main">
+        {/* Title input frame */}
         <div>
-          <label className="block text-sm text-surface-300 mb-1.5">
+          <label className="block text-xs font-bold uppercase tracking-wider text-text-muted mb-1.5">
             Room Title *
           </label>
           <input
             type="text"
-            placeholder="What's this room about?"
+            placeholder="What frequency are you tuning into?"
             value={form.title}
             onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-            className="input-field"
+            className="input-field placeholder:text-text-muted/50"
             maxLength={80}
             autoFocus
           />
-          <p className="text-xs text-surface-600 mt-1 text-right">
-            {form.title.length}/80
+          <p className="text-[10px] font-mono font-bold text-text-muted mt-1 text-right">
+            {form.title.length}/80 UNITS
           </p>
         </div>
 
-        {/* Description */}
-        <div>
-          <label className="block text-sm text-surface-300 mb-1.5">
-            Description <span className="text-surface-600">(optional)</span>
+        {/* Description panel */}
+        {/* <div>
+          <label className="block text-xs font-bold uppercase tracking-wider text-text-muted mb-1.5">
+            Index Description{" "}
+            <span className="text-text-muted/60 font-medium lowercase">
+              (optional)
+            </span>
           </label>
           <textarea
-            placeholder="A brief description of the conversation..."
+            placeholder="Outline the scope of this conversation channel..."
             value={form.description}
             onChange={(e) =>
               setForm((f) => ({ ...f, description: e.target.value }))
             }
             rows={2}
-            className="input-field resize-none"
+            className="input-field resize-none placeholder:text-text-muted/50"
             maxLength={200}
           />
-        </div>
+        </div> */}
 
-        {/* Type */}
+        {/* Access type grid matrix */}
         <div>
-          <label className="block text-sm text-surface-300 mb-2">
-            Room Type
+          <label className="block text-xs font-bold uppercase tracking-wider text-text-muted mb-2">
+            Transmission Mode
           </label>
-          <div className="grid grid-cols-3 gap-2">
-            {ROOM_TYPE_OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                onClick={() => setForm((f) => ({ ...f, type: opt.value }))}
-                className={`flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border transition-all text-center ${
-                  form.type === opt.value
-                    ? "border-brand-500 bg-brand-600/15"
-                    : "border-white/8 hover:border-white/15 bg-white/3"
-                }`}
-              >
-                <span
-                  className={
-                    form.type === opt.value ? opt.color : "text-surface-400"
-                  }
+          <div className="grid grid-cols-3 gap-3">
+            {ROOM_TYPE_OPTIONS.map((opt) => {
+              const isSelected = form.type === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setForm((f) => ({ ...f, type: opt.value }))}
+                  className={`flex flex-col items-center justify-center gap-1.5 py-4 px-2 rounded-xl border transition-all text-center group cursor-pointer ${
+                    isSelected
+                      ? "border-text-main bg-text-main text-white shadow-[2px_2px_0px_rgba(0,0,0,0.15)]"
+                      : "border-text-main/10 hover:border-text-main bg-surface-bg text-text-muted hover:text-text-main"
+                  }`}
                 >
-                  {opt.icon}
-                </span>
-                <span
-                  className={`text-xs font-500 ${form.type === opt.value ? "text-surface-100" : "text-surface-400"}`}
-                >
-                  {opt.label}
-                </span>
-                <span className="text-[10px] text-surface-600 leading-tight">
-                  {opt.desc}
-                </span>
-              </button>
-            ))}
+                  <span
+                    className={isSelected ? "text-white" : "text-text-main"}
+                  >
+                    {opt.icon}
+                  </span>
+                  <span className="text-xs font-bold uppercase tracking-wider mt-0.5">
+                    {opt.label}
+                  </span>
+                  <span
+                    className={`text-[10px] font-medium leading-tight ${isSelected ? "text-white/80" : "text-text-muted"}`}
+                  >
+                    {opt.desc}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Topics */}
+        {/* Dynamic Topic tags registry */}
         <div>
-          <label className="block text-sm text-surface-300 mb-2">
-            Topics <span className="text-surface-600">(up to 3)</span>
+          <label className="block text-xs font-bold uppercase tracking-wider text-text-muted mb-2">
+            Topic Affiliations{" "}
+            <span className="text-text-muted/60 font-medium lowercase">
+              (max 3)
+            </span>
           </label>
           <div className="flex flex-wrap gap-1.5">
-            {TOPICS.map((topic) => (
-              <button
-                key={topic.id}
-                onClick={() => handleTopicToggle(topic.id)}
-                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs transition-all ${
-                  form.topics.includes(topic.id)
-                    ? "bg-brand-600/20 text-brand-300 border border-brand-600/30"
-                    : "bg-white/5 text-surface-400 border border-white/6 hover:bg-white/8"
-                } ${form.topics.length >= 3 && !form.topics.includes(topic.id) ? "opacity-40" : ""}`}
-              >
-                {topic.emoji} {topic.label}
-              </button>
-            ))}
+            {TOPICS.map((topic) => {
+              const isSelected = form.topics.includes(topic.id);
+              const isLimitReached = form.topics.length >= 3 && !isSelected;
+              return (
+                <button
+                  key={topic.id}
+                  type="button"
+                  disabled={isLimitReached}
+                  onClick={() => handleTopicToggle(topic.id)}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold tracking-wide border transition-all cursor-pointer ${
+                    isSelected
+                      ? "bg-brand border-text-main text-white shadow-[2px_2px_0px_rgba(0,0,0,0.15)]"
+                      : "bg-surface-bg text-text-main border-text-main/10 hover:border-text-main"
+                  } ${isLimitReached ? "opacity-30 cursor-not-allowed" : ""}`}
+                >
+                  <span>{topic.emoji}</span>
+                  <span>{topic.label}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Recording option */}
-        <div className="flex items-center justify-between p-3 rounded-xl bg-white/3 border border-white/6">
-          <div className="flex items-center gap-2.5">
-            <RiRecordCircleLine size={18} className="text-accent-coral" />
-            <div>
-              <p className="text-sm font-500 text-surface-200">
-                Allow Recording
+        {/* Audio Recording config card */}
+        {/* <div className="flex items-center justify-between p-4 rounded-xl bg-surface-bg border border-text-main/10">
+          <div className="flex items-center gap-3 min-w-0">
+            <RiRecordCircleLine
+              size={20}
+              className={
+                form.allowRecording
+                  ? "text-brand animate-pulse"
+                  : "text-text-muted"
+              }
+            />
+            <div className="min-w-0">
+              <p className="text-sm font-bold text-text-main leading-tight">
+                Archive Transmission Session
               </p>
-              <p className="text-xs text-surface-500">
-                Participants can record this session
+              <p className="text-xs font-medium text-text-muted mt-0.5">
+                Enable participants to record or log this live channel archive.
               </p>
             </div>
           </div>
           <button
+            type="button"
             onClick={() =>
               setForm((f) => ({ ...f, allowRecording: !f.allowRecording }))
             }
-            className={`w-11 h-6 rounded-full transition-all relative flex-shrink-0 ${
-              form.allowRecording ? "bg-brand-600" : "bg-surface-700"
+            className={`w-11 h-6 rounded-full transition-colors relative shrink-0 cursor-pointer border ${
+              form.allowRecording
+                ? "bg-text-main border-text-main"
+                : "bg-text-main/10 border-text-main/20"
             }`}
           >
             <span
-              className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${
+              className={`absolute top-0.5 w-4 h-4 rounded-full bg-white border border-text-main/20 shadow-sm transition-all ${
                 form.allowRecording ? "right-0.5" : "left-0.5"
               }`}
             />
           </button>
-        </div>
+        </div> */}
 
-        {/* Actions */}
-        <div className="flex gap-3 pt-1">
-          <button onClick={onClose} className="btn-secondary flex-1">
+        {/* Operational buttons action deck */}
+        <div className="flex gap-3 pt-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="btn-secondary flex-1 text-xs font-bold uppercase tracking-wider py-3!"
+          >
             Cancel
           </button>
           <button
+            type="button"
             onClick={handleCreate}
             disabled={creating || !form.title.trim()}
-            className="btn-primary flex-1 py-2.5"
+            className="btn-primary flex-1 text-xs font-bold uppercase tracking-wider py-3! shadow-[3px_3px_0px_rgba(0,0,0,1)] disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {creating ? "Creating..." : "Start Room"}
+            {creating ? "Launching Channel..." : "Deploy Transmission"}
           </button>
         </div>
       </div>

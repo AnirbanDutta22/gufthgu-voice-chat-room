@@ -71,13 +71,13 @@ const ProfilePage = () => {
 
   if (loading) {
     return (
-      <div className="max-w-2xl mx-auto px-6 py-8">
-        <div className="glass rounded-3xl p-8 animate-pulse">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-20 h-20 rounded-full bg-surface-800" />
-            <div className="flex-1">
-              <div className="h-5 bg-surface-800 rounded-full w-1/3 mb-2" />
-              <div className="h-3 bg-surface-800 rounded-full w-1/4" />
+      <div className="max-w-2xl mx-auto px-6 py-12 pt-28">
+        <div className="bg-surface-card border border-text-main/10 rounded-3xl p-8 space-y-4 animate-pulse">
+          <div className="flex items-center gap-4">
+            <div className="w-20 h-20 rounded-full bg-text-main/5" />
+            <div className="flex-1 space-y-2">
+              <div className="h-6 bg-text-main/5 rounded w-1/3" />
+              <div className="h-4 bg-text-main/5 rounded w-1/4" />
             </div>
           </div>
         </div>
@@ -100,54 +100,61 @@ const ProfilePage = () => {
   ];
 
   return (
-    <div className="max-w-2xl mx-auto px-6 py-8 page-enter">
-      {/* Profile card */}
-      <div className="glass rounded-3xl p-6 mb-6 border border-white/6">
-        <div className="flex items-start justify-between gap-4 mb-5">
-          <div className="flex items-start gap-4">
-            <Avatar user={viewedProfile} size={80} showBadge />
+    <div className="max-w-2xl mx-auto px-6 py-12 pt-28">
+      {/* Profile Card */}
+      <div className="bg-surface-card border border-text-main rounded-3xl p-8 mb-8 shadow-[4px_4px_0px_rgba(20,20,20,0.05)]">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6 mb-6">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
+            <Avatar
+              user={viewedProfile}
+              size={84}
+              showBadge
+              className="border-2 border-text-main"
+            />
             <div className="min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="font-display text-xl font-bold text-surface-50">
+              <div className="flex flex-col sm:flex-row items-center gap-2">
+                <h1 className="font-display text-3xl tracking-tight text-text-main">
                   {viewedProfile.name}
                 </h1>
                 {viewedProfile.isVerified && (
-                  <span className="text-xs bg-brand-600/20 text-brand-400 border border-brand-600/25 px-2 py-0.5 rounded-full">
-                    ✓ Verified
+                  <span className="text-[10px] uppercase font-bold tracking-wider bg-accent-dark text-white px-2.5 py-0.5 rounded">
+                    Verified
                   </span>
                 )}
               </div>
-              <p className="text-surface-500 text-sm">
+              <p className="text-text-muted font-medium text-sm mt-0.5">
                 @{viewedProfile.username}
               </p>
               {viewedProfile.bio && (
-                <p className="text-surface-300 text-sm mt-2 leading-relaxed">
+                <p className="text-text-main font-medium text-sm mt-3 leading-relaxed">
                   {viewedProfile.bio}
                 </p>
               )}
             </div>
           </div>
 
-          <div className="flex-shrink-0">
+          <div className="shrink-0 self-center sm:self-start">
             {isOwnProfile ? (
               <button
                 onClick={() => navigate("/settings")}
-                className="btn-secondary flex items-center gap-2 text-sm"
+                className="btn-secondary px-5! py-2.5! flex items-center gap-2 text-xs uppercase font-bold tracking-wider"
               >
-                <RiEditLine size={15} /> Edit
+                <RiEditLine size={14} /> Edit Identity
               </button>
             ) : (
               <button
                 onClick={handleFollowToggle}
                 disabled={followLoading}
-                className={`flex items-center gap-2 text-sm px-4 py-2 rounded-xl transition-all ${
-                  following ? "btn-secondary" : "btn-primary"
+                className={`flex items-center gap-2 text-xs uppercase font-bold tracking-wider px-5 py-2.5 rounded-full border transition-all duration-200 ${
+                  following
+                    ? "bg-transparent text-text-main border-text-main hover:bg-text-main hover:text-white"
+                    : "bg-brand text-white border-brand hover:bg-brand-hover hover:border-brand-hover"
                 }`}
               >
                 {following ? (
-                  <RiUserFollowLine size={15} />
+                  <RiUserFollowLine size={14} />
                 ) : (
-                  <RiUserAddLine size={15} />
+                  <RiUserAddLine size={14} />
                 )}
                 {following ? "Following" : "Follow"}
               </button>
@@ -155,30 +162,35 @@ const ProfilePage = () => {
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="flex gap-5 mb-5">
+        {/* Stats Registry */}
+        <div className="flex gap-8 py-4 my-2 border-y border-text-main/10">
           {[
             { label: "Followers", value: viewedProfile.followerCount || 0 },
             { label: "Following", value: viewedProfile.followingCount || 0 },
             { label: "Rooms", value: viewedProfile.roomCount || rooms.length },
           ].map((stat) => (
-            <div key={stat.label}>
-              <p className="font-display font-bold text-surface-50 text-lg leading-none">
+            <div key={stat.label} className="text-left">
+              <p className="font-display text-2xl text-text-main leading-none">
                 {stat.value}
               </p>
-              <p className="text-surface-500 text-xs mt-0.5">{stat.label}</p>
+              <p className="text-text-muted text-xs font-bold uppercase tracking-wider mt-1">
+                {stat.label}
+              </p>
             </div>
           ))}
         </div>
 
-        {/* Topics */}
+        {/* Topic Pills */}
         {viewedProfile.topics?.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-1.5 pt-2">
             {viewedProfile.topics.map((topicId) => {
               const t = TOPICS.find((tp) => tp.id === topicId);
               return t ? (
-                <Tag key={topicId} size="sm" emoji={t.emoji}>
-                  {t.label}
+                <Tag
+                  key={topicId}
+                  className="bg-surface-bg border border-text-main/10 text-text-main rounded-md font-medium px-2.5 py-0.5 text-xs"
+                >
+                  {t.emoji} {t.label}
                 </Tag>
               ) : null;
             })}
@@ -186,16 +198,16 @@ const ProfilePage = () => {
         )}
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-1 p-1 glass rounded-xl mb-5 border border-white/5">
+      {/* Segmented Tab Bar */}
+      <div className="flex p-1 bg-surface-alt rounded-xl mb-6 border border-text-main/5">
         {TABS.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex-1 py-2 rounded-lg text-sm transition-all ${
+            className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
               activeTab === tab.id
-                ? "bg-brand-600 text-white font-500"
-                : "text-surface-400 hover:text-surface-200"
+                ? "bg-text-main text-white shadow-sm"
+                : "text-text-muted hover:text-text-main"
             }`}
           >
             {tab.label}
@@ -203,43 +215,43 @@ const ProfilePage = () => {
         ))}
       </div>
 
-      {/* Tab Content */}
+      {/* Tabs Layout Matrices */}
       {activeTab === "rooms" && (
         <div className="space-y-3">
           {rooms.length === 0 ? (
-            <div className="text-center py-10 text-surface-500 text-sm">
+            <div className="text-center py-12 bg-white/50 rounded-2xl border border-dashed border-text-main/10 text-text-muted text-sm font-medium">
               {isOwnProfile
                 ? "You haven't hosted any rooms yet."
-                : "No rooms hosted yet."}
+                : "No archives listed under this profile."}
             </div>
           ) : (
             rooms.map((room) => (
               <div
                 key={room._id}
                 onClick={() => room.isLive && navigate(`/room/${room._id}`)}
-                className={`room-card p-4 ${room.isLive ? "cursor-pointer" : "opacity-70"}`}
+                className={`bg-surface-card border border-text-main/10 hover:border-text-main rounded-2xl p-5 flex items-center justify-between transition-all duration-200 shadow-sm ${
+                  room.isLive ? "cursor-pointer" : "opacity-75"
+                }`}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-start gap-3 min-w-0">
-                    <div className="w-9 h-9 rounded-xl gradient-brand flex items-center justify-center flex-shrink-0">
-                      <RiMicLine size={16} className="text-white" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-500 text-surface-100 text-sm truncate">
-                        {room.title}
-                      </p>
-                      <p className="text-xs text-surface-500 mt-0.5">
-                        {room.listenerCount || 0} listeners
-                      </p>
-                    </div>
+                <div className="flex items-center gap-4 min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-brand/10 text-brand flex items-center justify-center shrink-0 border border-brand/20">
+                    <RiMicLine size={18} />
                   </div>
-                  {room.isLive && (
-                    <span className="flex items-center gap-1 text-xs text-accent-coral flex-shrink-0 ml-3">
-                      <span className="w-1.5 h-1.5 rounded-full bg-accent-coral animate-pulse inline-block" />
-                      Live
-                    </span>
-                  )}
+                  <div className="min-w-0">
+                    <p className="font-semibold text-text-main text-sm truncate">
+                      {room.title}
+                    </p>
+                    <p className="text-xs font-medium text-text-muted mt-0.5">
+                      {room.listenerCount || 0} listening units
+                    </p>
+                  </div>
                 </div>
+                {room.isLive && (
+                  <span className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-brand bg-brand/10 px-2.5 py-0.5 rounded">
+                    <span className="w-1.5 h-1.5 rounded-full bg-brand animate-pulse inline-block" />
+                    Live
+                  </span>
+                )}
               </div>
             ))
           )}
@@ -277,14 +289,14 @@ const FollowersList = ({ userId, type }) => {
 
   if (loading)
     return (
-      <div className="text-center py-8 text-surface-500 text-sm">
-        Loading...
+      <div className="text-center py-12 text-text-muted text-sm font-medium animate-pulse">
+        Loading listings...
       </div>
     );
   if (!users.length)
     return (
-      <div className="text-center py-8 text-surface-500 text-sm">
-        No {type} yet.
+      <div className="text-center py-12 text-text-muted text-sm font-medium border border-dashed border-text-main/10 rounded-2xl bg-white/50">
+        No profiles categorized yet.
       </div>
     );
 
@@ -294,14 +306,14 @@ const FollowersList = ({ userId, type }) => {
         <button
           key={u._id}
           onClick={() => navigate(`/profile/${u._id}`)}
-          className="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-white/4 transition-colors text-left"
+          className="flex items-center gap-3 w-full p-4 rounded-xl bg-surface-card border border-text-main/5 hover:border-text-main transition-all duration-200 text-left shadow-sm"
         >
           <Avatar user={u} size={40} showBadge />
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-500 text-surface-100 truncate">
+            <p className="text-sm font-semibold text-text-main truncate">
               {u.name}
             </p>
-            <p className="text-xs text-surface-500">@{u.username}</p>
+            <p className="text-xs text-text-muted font-medium">@{u.username}</p>
           </div>
         </button>
       ))}

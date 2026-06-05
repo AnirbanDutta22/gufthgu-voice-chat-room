@@ -21,9 +21,9 @@ const STEPS = [
 ];
 
 const ProfileStep = ({ data, onChange }) => (
-  <div className="space-y-4 animate-slide-up">
+  <div className="space-y-4 animate-slide-up text-text-main">
     <div>
-      <label className="block text-sm text-surface-300 mb-1.5">
+      <label className="block text-xs font-bold uppercase tracking-wider text-text-muted mb-1.5">
         Display Name *
       </label>
       <input
@@ -31,16 +31,16 @@ const ProfileStep = ({ data, onChange }) => (
         placeholder="How should people call you?"
         value={data.name}
         onChange={(e) => onChange({ name: e.target.value })}
-        className="input-field"
+        className="input-field focus:border-text-main placeholder:text-text-muted/40"
         autoFocus
       />
     </div>
     <div>
-      <label className="block text-sm text-surface-300 mb-1.5">
+      <label className="block text-xs font-bold uppercase tracking-wider text-text-muted mb-1.5">
         Username *
       </label>
       <div className="relative">
-        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-surface-500 text-sm">
+        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted font-bold text-sm">
           @
         </span>
         <input
@@ -52,18 +52,20 @@ const ProfileStep = ({ data, onChange }) => (
               username: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""),
             })
           }
-          className="input-field pl-8"
+          className="input-field pl-8 focus:border-text-main placeholder:text-text-muted/40"
         />
       </div>
     </div>
     <div>
-      <label className="block text-sm text-surface-300 mb-1.5">Bio</label>
+      <label className="block text-xs font-bold uppercase tracking-wider text-text-muted mb-1.5">
+        Bio
+      </label>
       <textarea
         placeholder="Tell people a little about yourself..."
         value={data.bio}
         onChange={(e) => onChange({ bio: e.target.value })}
         rows={3}
-        className="input-field resize-none"
+        className="input-field resize-none focus:border-text-main placeholder:text-text-muted/40"
       />
     </div>
   </div>
@@ -85,7 +87,7 @@ const PhotoStep = ({ data, onChange }) => {
     <div className="flex flex-col items-center animate-slide-up">
       <div
         onClick={() => fileRef.current?.click()}
-        className="relative w-32 h-32 rounded-full cursor-pointer group"
+        className="relative w-32 h-32 rounded-full cursor-pointer group border-2 border-text-main shadow-[3px_3px_0px_rgba(0,0,0,1)] overflow-hidden"
       >
         {preview ? (
           <img
@@ -94,11 +96,11 @@ const PhotoStep = ({ data, onChange }) => {
             alt="Avatar preview"
           />
         ) : (
-          <div className="w-32 h-32 rounded-full bg-surface-800 border-2 border-dashed border-surface-600 flex items-center justify-center">
-            <RiUserLine size={40} className="text-surface-500" />
+          <div className="w-32 h-32 rounded-full bg-surface-bg flex items-center justify-center">
+            <RiUserLine size={40} className="text-text-muted" />
           </div>
         )}
-        <div className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+        <div className="absolute inset-0 rounded-full bg-text-main/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
           <RiCameraLine size={28} className="text-white" />
         </div>
       </div>
@@ -111,18 +113,20 @@ const PhotoStep = ({ data, onChange }) => {
       />
       <button
         onClick={() => fileRef.current?.click()}
-        className="btn-secondary mt-4 text-sm"
+        className="btn-secondary mt-5 text-xs font-bold uppercase tracking-wider !py-2.5 !px-4 bg-white"
       >
-        {preview ? "Change Photo" : "Upload Photo"}
+        {preview ? "Change Avatar Image" : "Upload Image Source"}
       </button>
-      <p className="text-surface-500 text-xs mt-3">JPG, PNG or GIF · Max 5MB</p>
+      <p className="text-text-muted text-[10px] font-mono font-bold uppercase tracking-wide mt-3">
+        JPG, PNG or GIF · Max 5MB
+      </p>
     </div>
   );
 };
 
 const TopicsStep = ({ selected, onChange }) => (
   <div className="animate-slide-up">
-    <p className="text-surface-400 text-sm mb-5 text-center">
+    <p className="text-text-muted text-xs font-bold uppercase tracking-wider mb-5 text-center">
       Pick at least 3 topics you enjoy
     </p>
     <div className="flex flex-wrap gap-2 justify-center">
@@ -131,6 +135,7 @@ const TopicsStep = ({ selected, onChange }) => (
         return (
           <button
             key={topic.id}
+            type="button"
             onClick={() =>
               onChange(
                 isSelected
@@ -138,14 +143,14 @@ const TopicsStep = ({ selected, onChange }) => (
                   : [...selected, topic.id],
               )
             }
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm transition-all ${
+            className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-bold tracking-wide border transition-all cursor-pointer ${
               isSelected
-                ? "bg-brand-600 text-white shadow-glow"
-                : "bg-white/5 text-surface-300 border border-white/8 hover:bg-white/10"
+                ? "bg-brand text-white border-text-main shadow-[2px_2px_0px_rgba(0,0,0,1)]"
+                : "bg-surface-bg text-text-main border-text-main/10 hover:border-text-main"
             }`}
           >
-            <span>{topic.emoji}</span> {topic.label}
-            {isSelected && <RiCheckLine size={13} />}
+            <span>{topic.emoji}</span> <span>{topic.label}</span>
+            {isSelected && <RiCheckLine size={13} className="ml-1" />}
           </button>
         );
       })}
@@ -155,13 +160,13 @@ const TopicsStep = ({ selected, onChange }) => (
 
 const DoneStep = ({ name }) => (
   <div className="text-center animate-slide-up py-4">
-    <div className="w-20 h-20 rounded-full gradient-brand flex items-center justify-center mx-auto mb-5 shadow-glow-lg">
-      <RiCheckLine size={36} className="text-white" />
+    <div className="w-16 h-16 rounded-full bg-brand text-white flex items-center justify-center mx-auto mb-5 border-2 border-text-main shadow-[3px_3px_0px_rgba(0,0,0,1)]">
+      <RiCheckLine size={32} />
     </div>
-    <h3 className="font-display text-2xl font-bold text-surface-50 mb-2">
+    <h3 className="font-display text-2xl font-black tracking-tight text-text-main mb-2">
       You're in, {name || "friend"}! 🎉
     </h3>
-    <p className="text-surface-400 text-sm">
+    <p className="text-text-muted text-xs font-bold uppercase tracking-wider">
       Your profile is ready. Let's find some rooms.
     </p>
   </div>
@@ -191,9 +196,6 @@ const OnboardingPage = () => {
   };
 
   const handleNext = async () => {
-    console.log("Pressed");
-
-    // If we are on the Topics step (index 2)
     if (step === STEPS.length - 2) {
       setLoading(true);
       try {
@@ -207,14 +209,8 @@ const OnboardingPage = () => {
           formData.append("avatar", photoData.avatarFile);
 
         const res = await api.put("/users/profile", formData);
-
-        console.log(res.data);
-        console.log(res.data.user);
-
         dispatch(updateUserProfile(res.data.user));
         toast.success("Profile saved!");
-
-        // Move to the "Done" step (Index 3)
         setStep((s) => s + 1);
       } catch (err) {
         toast.error("Failed to save profile");
@@ -222,13 +218,9 @@ const OnboardingPage = () => {
       } finally {
         setLoading(false);
       }
-    }
-    // If we are on the final "Done" step (index 3)
-    else if (step === STEPS.length - 1) {
-      navigate("/explore"); // This is where the navigation belongs!
-    }
-    // For steps 0 and 1
-    else {
+    } else if (step === STEPS.length - 1) {
+      navigate("/explore");
+    } else {
       setStep((s) => s + 1);
     }
   };
@@ -236,55 +228,52 @@ const OnboardingPage = () => {
   const progress = ((step + 1) / STEPS.length) * 100;
 
   return (
-    <div
-      className="min-h-screen flex flex-col items-center justify-center px-4 py-12"
-      style={{ background: "var(--bg-primary)" }}
-    >
+    <div className="min-h-screen bg-surface-bg flex flex-col items-center justify-center px-4 py-12 selection:bg-brand selection:text-white">
       <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="font-display text-3xl font-bold text-surface-50 mb-2">
+        {/* Header Block */}
+        <div className="text-center mb-6">
+          <h1 className="font-display text-3xl font-black tracking-tight text-text-main mb-1">
             Create your profile
           </h1>
-          <p className="text-surface-400 text-sm">
+          <p className="text-text-muted text-xs font-bold uppercase tracking-widest">
             Step {step + 1} of {STEPS.length} — {STEPS[step].label}
           </p>
         </div>
 
-        {/* Progress */}
-        <div className="w-full h-1 bg-surface-800 rounded-full mb-8 overflow-hidden">
+        {/* Heavy Matrix Progress Bar */}
+        <div className="w-full h-3.5 bg-white border-2 border-text-main rounded-full mb-8 overflow-hidden p-0.5 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
           <div
-            className="h-full rounded-full gradient-brand transition-all duration-500"
+            className="h-full rounded-full bg-brand border border-text-main transition-all duration-500"
             style={{ width: `${progress}%` }}
           />
         </div>
 
-        {/* Step indicators */}
-        <div className="flex items-center justify-between mb-8">
+        {/* Modular Step Matrix Indicators */}
+        <div className="flex items-center justify-between mb-8 px-2">
           {STEPS.map((s, i) => (
-            <div key={s.id} className="flex items-center gap-1">
+            <div key={s.id} className="flex items-center gap-1.5">
               <div
-                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black border-2 transition-all ${
                   i < step
-                    ? "bg-accent-mint text-surface-900"
+                    ? "bg-text-main text-white border-text-main"
                     : i === step
-                      ? "bg-brand-600 text-white"
-                      : "bg-surface-800 text-surface-500"
+                      ? "bg-brand text-white border-text-main shadow-[2px_2px_0px_rgba(0,0,0,1)]"
+                      : "bg-white text-text-muted/40 border-text-main/10"
                 }`}
               >
                 {i < step ? <RiCheckLine size={14} /> : i + 1}
               </div>
               {i < STEPS.length - 1 && (
                 <div
-                  className={`w-8 sm:w-16 h-px transition-all ${i < step ? "bg-accent-mint" : "bg-surface-700"}`}
+                  className={`w-6 sm:w-12 h-0.5 transition-all ${i < step ? "bg-text-main" : "bg-text-main/10"}`}
                 />
               )}
             </div>
           ))}
         </div>
 
-        {/* Content */}
-        <div className="glass rounded-3xl p-8 border border-white/8 mb-6">
+        {/* Central Core Interactive Shell */}
+        <div className="bg-surface-card rounded-3xl p-8 border-2 border-text-main mb-6 shadow-[5px_5px_0px_rgba(0,0,0,1)]">
           {step === 0 && (
             <ProfileStep
               data={profileData}
@@ -306,28 +295,30 @@ const OnboardingPage = () => {
           {step === 3 && <DoneStep name={profileData.name} />}
         </div>
 
-        {/* Navigation */}
+        {/* Operational Flow Controls Navigation Panel */}
         <div className="flex items-center gap-3">
           {step > 0 && step < STEPS.length - 1 && (
             <button
               onClick={() => setStep((s) => s - 1)}
-              className="btn-secondary flex items-center gap-2"
+              className="btn-secondary flex items-center gap-2 text-xs font-bold uppercase tracking-wider py-3! px-4 bg-white"
             >
-              <RiArrowLeftLine size={16} /> Back
+              <RiArrowLeftLine size={14} /> Back
             </button>
           )}
           <button
             onClick={handleNext}
             disabled={!isStepValid() || loading}
-            className="btn-primary flex-1 py-3 flex items-center justify-center gap-2"
+            className="btn-primary flex-1 py-3.5 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider shadow-[3px_3px_0px_rgba(0,0,0,1)] disabled:opacity-40"
           >
-            {loading
-              ? "Saving..."
-              : step === STEPS.length - 1
-                ? "Enter gufthgu"
-                : "Continue"}
+            <span>
+              {loading
+                ? "Saving..."
+                : step === STEPS.length - 1
+                  ? "Enter gufthgu"
+                  : "Continue"}
+            </span>
             {!loading && step !== STEPS.length - 1 && (
-              <RiArrowRightLine size={16} />
+              <RiArrowRightLine size={14} />
             )}
           </button>
         </div>
@@ -335,9 +326,9 @@ const OnboardingPage = () => {
         {step < STEPS.length - 1 && step !== 0 && (
           <button
             onClick={() => setStep((s) => s + 1)}
-            className="w-full text-center text-surface-500 text-xs mt-4 hover:text-surface-400 transition-colors"
+            className="w-full text-center text-text-muted hover:text-text-main font-mono text-[10px] font-bold uppercase tracking-wide mt-5"
           >
-            Skip this step
+            [&gt;&gt; Skip this step]
           </button>
         )}
       </div>
