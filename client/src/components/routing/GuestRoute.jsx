@@ -1,18 +1,17 @@
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-const GuestRoute = () => {
-  const { token, isProfileComplete } = useSelector((s) => s.auth);
+// Redirects logged-in users away from auth pages
+const GuestRoute = ({ children }) => {
+  const { isAuthenticated, isProfileComplete } = useSelector((s) => s.auth);
 
-  if (token && isProfileComplete) {
-    return <Navigate to="/explore" replace />;
+  if (isAuthenticated) {
+    return (
+      <Navigate to={isProfileComplete ? "/explore" : "/onboarding"} replace />
+    );
   }
 
-  if (token && !isProfileComplete) {
-    return <Navigate to="/onboarding" replace />;
-  }
-
-  return <Outlet />;
+  return children;
 };
 
 export default GuestRoute;

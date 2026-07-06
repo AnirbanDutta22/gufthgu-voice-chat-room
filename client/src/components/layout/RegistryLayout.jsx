@@ -6,25 +6,25 @@ const RegistryLayout = ({
   subtitle,
   onRefresh,
   isLoading,
-  filters, // Tab selectors/filters element
-  subFilters, // Topic pills/sub-navigation element
+  filters,
+  subFilters,
   isEmpty,
   emptyState,
   children,
 }) => {
   return (
-    <div className="max-w-6xl mx-auto px-6 py-12">
-      {/* Universal Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4 pb-6 border-b border-text-main/10">
+    <div className="max-w-6xl mx-auto px-6 py-10">
+      {/* Page Header */}
+      <div className="flex items-end justify-between mb-8 border-b border-text-main pb-6">
         <div>
-          <h1 className="font-display text-5xl tracking-tight text-text-main">
+          <h1 className="font-display text-5xl md:text-6xl tracking-tight text-text-main leading-none">
             {title}{" "}
             {italicTitle && (
               <span className="italic text-brand">{italicTitle}</span>
             )}
           </h1>
           {subtitle && (
-            <p className="text-text-muted text-base mt-1 font-medium">
+            <p className="text-text-muted font-medium text-sm mt-3 max-w-lg">
               {subtitle}
             </p>
           )}
@@ -32,42 +32,47 @@ const RegistryLayout = ({
         {onRefresh && (
           <button
             onClick={onRefresh}
-            className="btn-secondary flex items-center justify-center gap-2 text-sm px-5! py-2.5! self-start sm:self-auto"
+            className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-text-muted hover:text-text-main border border-text-main/10 hover:border-text-main px-4 py-2.5 rounded-full transition-all"
           >
             <RiRefreshLine
-              size={15}
+              size={14}
               className={isLoading ? "animate-spin" : ""}
             />
-            Refresh Registry
+            <span className="hidden sm:inline">Refresh</span>
           </button>
         )}
       </div>
 
-      {/* Dynamic Filter Sections */}
-      {filters && <div className="mb-6">{filters}</div>}
-      {subFilters && <div className="mb-10">{subFilters}</div>}
+      {/* Filters */}
+      {filters && <div className="mb-4">{filters}</div>}
+      {subFilters && <div className="mb-6">{subFilters}</div>}
 
-      {/* Main Grid Content Area */}
+      {/* Content */}
       {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {[...Array(6)].map((_, i) => (
             <div
               key={i}
-              className="bg-surface-card border border-text-main/10 rounded-[20px] p-6 space-y-4"
+              className="room-card p-6 animate-pulse space-y-3"
+              style={{ animationDelay: `${i * 0.08}s` }}
             >
-              <div className="h-4 rounded bg-text-main/5 w-1/3 animate-pulse" />
-              <div className="h-6 rounded bg-text-main/5 animate-pulse" />
-              <div className="h-4 rounded bg-text-main/5 w-2/3 animate-pulse" />
-              <div className="h-10 rounded-lg bg-text-main/5 pt-2 animate-pulse" />
+              <div className="h-3 bg-text-main/5 rounded-full w-1/4" />
+              <div className="h-7 bg-text-main/5 rounded-lg w-full" />
+              <div className="h-4 bg-text-main/5 rounded-full w-2/3" />
+              <div className="h-px bg-text-main/5 mt-4" />
+              <div className="flex justify-between">
+                <div className="h-3 bg-text-main/5 rounded-full w-1/3" />
+                <div className="w-7 h-7 rounded-full bg-text-main/5" />
+              </div>
             </div>
           ))}
         </div>
       ) : isEmpty ? (
-        <div className="flex flex-col items-center justify-center py-24 text-center border border-dashed border-text-main/20 rounded-3xl bg-surface-card/50">
+        <div className="flex flex-col items-center justify-center py-24 text-center">
           {emptyState}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {children}
         </div>
       )}
