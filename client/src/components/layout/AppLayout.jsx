@@ -66,7 +66,7 @@ const AppLayout = () => {
           )}
           <button
             onClick={() => setSidebarOpen((v) => !v)}
-            className={`${sidebarOpen ? "ml-auto" : "mx-auto"} p-1.5 rounded-lg text-text-muted hover:text-text-main hover:bg-surface-bg transition-colors border border-transparent hover:border-text-main/10`}
+            className={`${sidebarOpen ? "ml-auto" : "ml-5"} p-1.5 rounded-lg text-text-muted hover:text-text-main hover:bg-surface-bg transition-colors border border-transparent hover:border-text-main/10`}
           >
             <RiMenuLine size={16} />
           </button>
@@ -208,17 +208,7 @@ const AppLayout = () => {
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* Top Header Deck */}
         <header className="flex items-center justify-between px-8 h-16 border-b border-text-main bg-white shrink-0 z-20">
-          <div className="flex items-center gap-4">
-            {!sidebarOpen && (
-              <button
-                onClick={() => setSidebarOpen(true)}
-                className="p-2 rounded-xl border border-text-main/10 text-text-muted hover:text-text-main hover:bg-surface-bg transition-colors"
-              >
-                <RiMenuLine size={18} />
-              </button>
-            )}
-
-            {/* Command Box Mock Button UI */}
+          <div className="flex items-center gap-4 ml-2">
             <button
               onClick={() => setSearchOpen(true)}
               className="hidden sm:flex items-center gap-2.5 px-4 py-2 rounded-xl bg-surface-bg border border-text-main/10 text-text-muted hover:border-text-main transition-all text-xs font-bold uppercase tracking-wider w-64 text-left"
