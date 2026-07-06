@@ -1,38 +1,60 @@
 const express = require("express");
 const path = require("path");
 const cors = require("cors");
+const helmet = require("helmet");
+const morgan = require("morgan");
 
-//internal imports
-const { errorHandler } = require("./middlewares/errorHandler");
-// const testRouter = require("./routes/test.route");
-const userRouter = require("./routes/user.route");
+const { errorHandler, notFound } = require("./middlewares/errorHandler");
+const { apiLimiter } = require("./middlewares/rateLimiter");
 const authRouter = require("./routes/auth.route");
+const userRouter = require("./routes/user.route");
+const roomRouter = require("./routes/room.route");
 const { protect } = require("./middlewares/auth");
 
 const app = express();
 
-//cors
+// Security
+app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
+
+// CORS
 app.use(
   cors({
-    origin: [process.env.CLIENT_ORIGIN],
+    origin: process.env.CLIENT_ORIGIN || "http://localhost:5173",
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   }),
 );
 
-//request parsers
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Logging in dev
+if (process.env.NODE_ENV === "development") app.use(morgan("dev"));
 
-//set static folder
-app.use(express.static(path.join(__dirname, "public")));
+// Body parsers
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-//routes
+// Static files (uploaded avatars)
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+
+// Rate limit
+app.use("/api/v1", apiLimiter);
+
+// Routes
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users", protect, userRouter);
-// app.use("/api/v1", testRouter);
+app.use("/api/v1/rooms", roomRouter);
 
-//errors handler
+// Health check
+app.get("/api/v1/health", (req, res) => {
+  res.json({
+    success: true,
+    message: "Gufthgu API is running 🎤",
+    env: process.env.NODE_ENV,
+  });
+});
+
+// 404 + error handler
+app.use(notFound);
 app.use(errorHandler);
 
 module.exports = app;
