@@ -1,11 +1,12 @@
+/* eslint-disable react-hooks/purity */
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   RiMicLine,
   RiMicOffLine,
-  // RiHandLine,
-  // RiChatLine,
+  RiHandHeartLine,
+  RiMessage3Line,
   RiRecordCircleLine,
   RiStopCircleLine,
   RiArrowLeftLine,
@@ -18,18 +19,11 @@ import {
 } from "react-icons/ri";
 import toast from "react-hot-toast";
 
-// Redux Actions
-import {
-  fetchRoomById,
-  joinRoom,
-  leaveRoom,
-  endRoom,
-} from "../store/slices/roomSlice";
+import { joinRoom, leaveRoom, endRoom } from "../store/slices/roomSlice";
 import { setRecording, resetAudio } from "../store/slices/audioSlice";
 import { setChatOpen, clearChat } from "../store/slices/chatSlice";
 import { setAnalyticsModal } from "../store/slices/uiSlice";
 
-// Socket & WebRTC Services
 import {
   joinRoomSocket,
   leaveRoomSocket,
@@ -41,7 +35,6 @@ import {
 import webRTCService from "../services/webrtc";
 import { useRoom } from "../hooks";
 
-// Components
 import Avatar from "../components/ui/Avatar";
 import AudioBars from "../components/ui/AudioBars";
 import RoomChat from "../components/rooms/RoomChat";
@@ -55,7 +48,6 @@ const RoomPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Global State
   const { currentRoom, activeParticipants, raisedHands, loading } = useSelector(
     (s) => s.room,
   );
@@ -65,67 +57,57 @@ const RoomPage = () => {
   );
   const { isChatOpen, unreadCount } = useSelector((s) => s.chat);
 
-  // Local State
   const [handRaised, setHandRaised] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [selectedParticipant, setSelectedParticipant] = useState(null);
   const [reactions, setReactions] = useState([]);
 
-  // Custom Hook for specific room logic (WebRTC mapping, standard listeners)
   const { setupSocketListeners, joinRoomAudio, handleMuteToggle } =
     useRoom(roomId);
 
-  // Role & Permissions
-  const isHost = currentRoom?.host?._id === user?._id;
-  const myRole =
-    activeParticipants.find((p) => p._id === user?._id)?.role || "listener";
+  const isHost =
+    currentRoom?.host?._id === user?._id || currentRoom?.host === user?._id;
+  const myParticipant = activeParticipants.find((p) => p._id === user?._id);
+  const myRole = myParticipant?.role || "listener";
   const canSpeak = ["host", "co_host", "speaker"].includes(myRole);
 
-  // Stage Segregation
   const speakers = activeParticipants.filter((p) =>
     ["host", "co_host", "speaker"].includes(p.role),
   );
   const listeners = activeParticipants.filter((p) => p.role === "listener");
 
   const typeIcon = {
-    public: <RiGlobalLine size={14} />,
-    social: <RiGroupLine size={14} />,
-    private: <RiLockLine size={14} />,
+    public: <RiGlobalLine size={13} />,
+    social: <RiGroupLine size={13} />,
+    private: <RiLockLine size={13} />,
   };
 
-  // ----------------------------------------------------------------------
-  // Lifecycle Initialization & Cleanup
-  // ----------------------------------------------------------------------
+  // Lifecycle
   useEffect(() => {
     let cleanupSocket;
-
     const initRoom = async () => {
       try {
         await dispatch(joinRoom(roomId));
         joinRoomSocket(roomId);
         await joinRoomAudio();
-      } catch (error) {
-        toast.error("Failed to join room securely.");
+      } catch {
+        toast.error("Failed to join room.");
         navigate("/explore");
       }
     };
-
     initRoom();
     cleanupSocket = setupSocketListeners();
 
-    // Cleanup function on component unmount
     return () => {
-      if (cleanupSocket) cleanupSocket();
+      cleanupSocket?.();
       leaveRoomSocket(roomId);
       webRTCService.cleanup();
       dispatch(resetAudio());
       dispatch(clearChat());
     };
-  }, [roomId, dispatch]); // setupSocketListeners and joinRoomAudio should be stable references in useRoom hook
+  }, [roomId]);
 
-  // ----------------------------------------------------------------------
   // Handlers
-  // ----------------------------------------------------------------------
   const handleLeave = async () => {
     await dispatch(leaveRoom(roomId));
     leaveRoomSocket(roomId);
@@ -145,10 +127,10 @@ const RoomPage = () => {
   };
 
   const handleRaiseHand = () => {
-    const newState = !handRaised;
-    setHandRaised(newState);
-    newState ? emitRaiseHand(roomId) : emitLowerHand(roomId);
-    if (newState) toast("✋ Hand raised", { duration: 2000 });
+    const next = !handRaised;
+    setHandRaised(next);
+    next ? emitRaiseHand(roomId) : emitLowerHand(roomId);
+    if (next) toast("✋ Hand raised", { duration: 2000 });
   };
 
   const handleRecording = () => {
@@ -158,7 +140,7 @@ const RoomPage = () => {
       toast.success("Recording stopped");
     } else {
       if (!currentRoom?.allowRecording) {
-        toast.error("Recording not allowed in this room");
+        toast.error("Recording is not enabled for this room");
         return;
       }
       emitStartRecording(roomId);
@@ -169,91 +151,84 @@ const RoomPage = () => {
 
   const addFloatingReaction = (emoji) => {
     const id = Date.now();
-    setReactions((r) => [...r, { id, emoji, x: Math.random() * 80 + 10 }]);
-    // Remove reaction after animation completes (2.5s)
+    setReactions((r) => [...r, { id, emoji, x: Math.random() * 70 + 15 }]);
     setTimeout(() => setReactions((r) => r.filter((re) => re.id !== id)), 2500);
   };
 
-  // ----------------------------------------------------------------------
-  // Loading State
-  // ----------------------------------------------------------------------
+  // Loading
   if (loading || !currentRoom) {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center"
-        style={{ background: "var(--bg-primary)" }}
-      >
+      <div className="min-h-screen flex items-center justify-center bg-surface-bg">
         <div className="text-center">
-          <div className="w-16 h-16 rounded-2xl gradient-brand flex items-center justify-center mx-auto mb-4 animate-float">
-            <RiMicLine size={28} className="text-white" />
+          <div className="w-16 h-16 rounded-2xl bg-text-main text-white flex items-center justify-center mx-auto mb-4 border border-text-main animate-pulse">
+            <RiMicLine size={28} />
           </div>
-          <p className="text-surface-400 text-sm">Joining room...</p>
+          <p className="text-text-muted text-sm font-semibold uppercase tracking-wider">
+            Joining room...
+          </p>
         </div>
       </div>
     );
   }
 
-  // ----------------------------------------------------------------------
-  // Main Render
-  // ----------------------------------------------------------------------
+  // Render
   return (
-    <div
-      className="min-h-screen flex flex-col"
-      style={{ background: "var(--bg-primary)" }}
-    >
-      {/* Floating Reactions Overlay */}
-      <div className="fixed bottom-32 left-0 right-0 pointer-events-none z-50">
+    <div className="min-h-screen flex flex-col bg-surface-bg text-text-main">
+      {/* Floating reactions */}
+      <div className="fixed bottom-36 left-0 right-0 pointer-events-none z-50 overflow-hidden h-32">
         {reactions.map((r) => (
-          <div
+          <span
             key={r.id}
-            className="absolute text-3xl animate-float"
+            className="absolute text-3xl"
             style={{
               left: `${r.x}%`,
-              animation: "float-up 2.5s ease-out forwards",
               bottom: 0,
+              animation: "floatUp 2.5s ease-out forwards",
             }}
           >
             {r.emoji}
-          </div>
+          </span>
         ))}
       </div>
 
+      <style>{`
+        @keyframes floatUp {
+          0%   { transform: translateY(0); opacity: 1; }
+          100% { transform: translateY(-120px); opacity: 0; }
+        }
+      `}</style>
+
       <div className="flex flex-1 overflow-hidden">
-        {/* Main Room Area */}
+        {/*Main room area*/}
         <div className="flex-1 flex flex-col overflow-hidden max-w-4xl mx-auto w-full px-6 py-6">
-          {/* Room Header */}
+          {/* Header */}
           <div className="flex items-start justify-between mb-6">
             <div className="flex items-center gap-3">
               <button
                 onClick={handleLeave}
-                className="p-2 rounded-xl hover:bg-white/5 text-surface-400 hover:text-surface-200 transition-colors"
-                aria-label="Leave Room"
+                className="p-2 rounded-xl hover:bg-text-main/5 text-text-muted hover:text-text-main transition-colors border border-transparent hover:border-text-main/10"
               >
                 <RiArrowLeftLine size={20} />
               </button>
               <div>
-                <div className="flex items-center gap-2 mb-0.5">
-                  <span className="text-surface-500 flex items-center gap-1 text-xs">
-                    {typeIcon[currentRoom.type] || <RiGlobalLine size={14} />}
-                    <span className="capitalize">
-                      {currentRoom.type || "Public"}
-                    </span>
+                <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                  <span className="text-text-muted flex items-center gap-1 text-xs font-bold uppercase tracking-wider">
+                    {typeIcon[currentRoom.type] || <RiGlobalLine size={13} />}
+                    <span>{currentRoom.type || "public"}</span>
                   </span>
-
                   {currentRoom.isLive && (
                     <>
-                      <span className="text-surface-700">·</span>
-                      <span className="flex items-center gap-1 text-xs text-accent-coral">
-                        <span className="w-1.5 h-1.5 rounded-full bg-accent-coral animate-pulse inline-block" />
+                      <span className="text-text-muted/30">·</span>
+                      <span className="flex items-center gap-1 text-xs font-bold text-brand">
+                        <span className="w-1.5 h-1.5 rounded-full bg-brand animate-pulse inline-block" />
                         Live
                       </span>
                     </>
                   )}
-
                   {isRecording && (
                     <>
-                      <span className="text-surface-700">·</span>
-                      <span className="flex items-center gap-1.5 text-xs text-red-400">
+                      <span className="text-text-muted/30">·</span>
+                      <span className="flex items-center gap-1.5 text-xs font-bold text-red-500">
                         <RiRecordCircleLine
                           size={12}
                           className="animate-pulse"
@@ -263,24 +238,24 @@ const RoomPage = () => {
                     </>
                   )}
                 </div>
-                <h1 className="font-display font-bold text-xl text-surface-50 leading-snug">
+                <h1 className="font-display text-2xl md:text-3xl text-text-main leading-tight">
                   {currentRoom.title}
                 </h1>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5 text-surface-400 text-sm bg-white/5 px-3 py-1.5 rounded-lg">
-                <RiGroupLine size={16} />
-                <span className="font-medium">{activeParticipants.length}</span>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <div className="flex items-center gap-1.5 text-text-muted text-sm font-bold border border-text-main/10 px-3 py-1.5 rounded-full bg-surface-card">
+                <RiGroupLine size={14} />
+                {activeParticipants.length}
               </div>
-              <button className="btn-ghost p-2 hover:bg-white/5 rounded-xl transition-colors">
+              <button className="p-2 rounded-xl hover:bg-text-main/5 text-text-muted transition-colors border border-transparent hover:border-text-main/10">
                 <RiShareLine size={18} />
               </button>
               {isHost && (
                 <button
                   onClick={() => setShowSettings(true)}
-                  className="btn-ghost p-2 hover:bg-white/5 rounded-xl transition-colors"
+                  className="p-2 rounded-xl hover:bg-text-main/5 text-text-muted transition-colors border border-transparent hover:border-text-main/10"
                 >
                   <RiSettingsLine size={18} />
                 </button>
@@ -288,27 +263,26 @@ const RoomPage = () => {
             </div>
           </div>
 
-          {/* Body Container (Scrollable) */}
+          {/* Scrollable body */}
           <div className="flex-1 overflow-y-auto scrollbar-none">
-            {/* Speakers Section / "On Stage" */}
-            <div className="mb-2">
-              <p className="text-xs text-surface-500 uppercase tracking-wider mb-4 font-semibold">
+            {/* On Stage — Speakers */}
+            <div className="mb-8">
+              <p className="text-xs font-bold uppercase tracking-widest text-text-muted mb-4">
                 On Stage
               </p>
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-5 mb-8">
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 md:gap-5">
                 {speakers.map((participant) => {
-                  const isSpeaking = audioLevels[participant._id] > 0.08;
+                  const isSpeaking = (audioLevels[participant._id] || 0) > 0.08;
                   const isActive = activeSpeaker === participant._id;
-                  const hasHandRaised = raisedHands.includes(participant._id);
+                  const handUp = raisedHands.includes(participant._id);
 
                   return (
                     <div
                       key={participant._id}
                       className="flex flex-col items-center gap-2 cursor-pointer group"
                       onClick={() => {
-                        if (isHost && participant._id !== user?._id) {
+                        if (isHost && participant._id !== user?._id)
                           setSelectedParticipant(participant);
-                        }
                       }}
                     >
                       <div className="relative">
@@ -317,24 +291,25 @@ const RoomPage = () => {
                           size={64}
                           isSpeaking={isSpeaking || isActive}
                           isMuted={participant.isMuted}
+                          className="transition-transform group-hover:scale-105"
                         />
                         {isSpeaking && (
-                          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2">
-                            <AudioBars active={true} height={14} />
+                          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2">
+                            <AudioBars active color="#f59e0b" />
                           </div>
                         )}
-                        {hasHandRaised && !isSpeaking && (
-                          <div className="absolute -top-1 -right-1 text-base drop-shadow-md">
+                        {handUp && !isSpeaking && (
+                          <div className="absolute -top-1 -right-1 text-base drop-shadow">
                             ✋
                           </div>
                         )}
                         {participant.role === "host" && (
-                          <div className="absolute -top-1 -left-1 w-4 h-4 rounded-full bg-accent-amber flex items-center justify-center text-[9px] shadow-lg">
+                          <div className="absolute -top-1 -left-1 w-4 h-4 rounded-full bg-brand text-white flex items-center justify-center text-[9px] border border-white shadow">
                             ★
                           </div>
                         )}
                       </div>
-                      <p className="text-xs text-surface-300 font-medium text-center truncate w-full max-w-[70px]">
+                      <p className="text-xs font-semibold text-text-main text-center truncate w-full max-w-[72px]">
                         {participant._id === user?._id
                           ? "You"
                           : participant.name?.split(" ")[0]}
@@ -345,34 +320,33 @@ const RoomPage = () => {
               </div>
             </div>
 
-            {/* Listeners Section / "Audience" */}
+            {/* Audience — Listeners */}
             {listeners.length > 0 && (
               <div>
-                <p className="text-xs text-surface-500 uppercase tracking-wider mb-4 font-semibold">
+                <p className="text-xs font-bold uppercase tracking-widest text-text-muted mb-4">
                   Audience ({listeners.length})
                 </p>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-4">
                   {listeners.map((p) => {
-                    const hasHandRaised = raisedHands.includes(p._id);
+                    const handUp = raisedHands.includes(p._id);
                     return (
                       <div
                         key={p._id}
-                        className="flex flex-col items-center gap-1.5 cursor-pointer hover:opacity-80 transition-opacity"
+                        className="flex flex-col items-center gap-1.5 cursor-pointer hover:opacity-75 transition-opacity"
                         onClick={() => {
-                          if (isHost && p._id !== user?._id) {
+                          if (isHost && p._id !== user?._id)
                             setSelectedParticipant(p);
-                          }
                         }}
                       >
                         <div className="relative">
                           <Avatar user={p} size={40} />
-                          {hasHandRaised && (
-                            <div className="absolute -top-1 -right-1 text-sm drop-shadow-md">
+                          {handUp && (
+                            <div className="absolute -top-1 -right-1 text-sm drop-shadow">
                               ✋
                             </div>
                           )}
                         </div>
-                        <p className="text-[10px] text-surface-500 max-w-[48px] truncate text-center">
+                        <p className="text-[10px] font-medium text-text-muted max-w-[48px] truncate text-center">
                           {p._id === user?._id ? "You" : p.name?.split(" ")[0]}
                         </p>
                       </div>
@@ -383,27 +357,27 @@ const RoomPage = () => {
             )}
           </div>
 
-          {/* Bottom Control Bar */}
-          <div className="mt-6 pt-4 border-t border-white/5">
-            {/* Emoji Reaction Bar */}
+          {/* Control Bar */}
+          <div className="mt-6 pt-5 border-t border-text-main/10">
+            {/* Emoji reactions */}
             <div className="flex justify-center gap-2 mb-4">
               {EMOJI_REACTIONS.map((emoji) => (
                 <button
                   key={emoji}
                   onClick={() => addFloatingReaction(emoji)}
-                  className="text-xl p-1.5 rounded-xl hover:bg-white/10 transition-all hover:-translate-y-1"
+                  className="text-xl p-2 rounded-xl hover:bg-text-main/5 transition-all hover:-translate-y-1 border border-transparent hover:border-text-main/10"
                 >
                   {emoji}
                 </button>
               ))}
             </div>
 
-            {/* Core Interaction Controls */}
             <div className="flex items-center justify-between">
+              {/* Left: Leave / End */}
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleLeave}
-                  className="px-4 py-2.5 rounded-xl text-sm font-medium bg-white/5 border border-white/10 text-surface-300 hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-400 transition-all flex items-center gap-2"
+                  className="px-4 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wide bg-surface-card border border-text-main/10 text-text-muted hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all flex items-center gap-2"
                 >
                   <RiDoorOpenLine size={16} />
                   Leave
@@ -411,39 +385,40 @@ const RoomPage = () => {
                 {isHost && (
                   <button
                     onClick={handleEndRoom}
-                    className="px-4 py-2.5 rounded-xl text-sm font-medium bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 transition-all"
+                    className="px-4 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wide bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 transition-all"
                   >
                     End Room
                   </button>
                 )}
               </div>
 
+              {/* Right: Action buttons */}
               <div className="flex items-center gap-2">
-                {/* Listener Actions */}
+                {/* Raise hand (listeners only) */}
                 {!canSpeak && (
                   <button
                     onClick={handleRaiseHand}
-                    className={`p-3 rounded-xl transition-all ${
-                      handRaised
-                        ? "bg-accent-amber/15 text-accent-amber border border-accent-amber/25"
-                        : "bg-white/5 text-surface-400 hover:text-surface-200 hover:bg-white/10 border border-white/10"
-                    }`}
                     title="Raise Hand"
+                    className={`p-3 rounded-xl transition-all border ${
+                      handRaised
+                        ? "bg-brand/10 text-brand border-brand/30 shadow-sm"
+                        : "bg-surface-card text-text-muted border-text-main/10 hover:text-text-main hover:border-text-main/20"
+                    }`}
                   >
-                    {/* <RiHandLine size={20} /> */}
+                    <RiHandHeartLine size={20} />
                   </button>
                 )}
 
-                {/* Speaker Actions */}
+                {/* Mute/unmute (speakers) */}
                 {canSpeak && (
                   <button
                     onClick={handleMuteToggle}
+                    title={isMuted ? "Unmute" : "Mute"}
                     className={`p-3 rounded-xl transition-all border ${
                       isMuted
-                        ? "bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20"
-                        : "bg-brand-600/15 text-brand-400 border-brand-600/25 shadow-glow hover:bg-brand-600/25"
+                        ? "bg-red-50 text-red-600 border-red-200 hover:bg-red-100"
+                        : "bg-brand/10 text-brand border-brand/30 hover:bg-brand/20"
                     }`}
-                    title={isMuted ? "Unmute Mic" : "Mute Mic"}
                   >
                     {isMuted ? (
                       <RiMicOffLine size={20} />
@@ -453,34 +428,34 @@ const RoomPage = () => {
                   </button>
                 )}
 
-                {/* Chat Toggle */}
+                {/* Chat */}
                 <button
                   onClick={() => dispatch(setChatOpen(!isChatOpen))}
+                  title="Chat"
                   className={`relative p-3 rounded-xl transition-all border ${
                     isChatOpen
-                      ? "bg-brand-600/15 text-brand-400 border-brand-600/25"
-                      : "bg-white/5 text-surface-400 hover:text-surface-200 hover:bg-white/10 border border-white/10"
+                      ? "bg-brand/10 text-brand border-brand/30"
+                      : "bg-surface-card text-text-muted border-text-main/10 hover:text-text-main hover:border-text-main/20"
                   }`}
-                  title="Open Chat"
                 >
-                  {/* <RiChatLine size={20} /> */}
+                  <RiMessage3Line size={20} />
                   {unreadCount > 0 && !isChatOpen && (
-                    <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-accent-coral text-[9px] flex items-center justify-center text-white font-bold border border-bg-primary">
+                    <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-brand text-[9px] flex items-center justify-center text-white font-bold border-2 border-white">
                       {unreadCount > 9 ? "9+" : unreadCount}
                     </span>
                   )}
                 </button>
 
-                {/* Recording Control (Host Only) */}
+                {/* Recording (host + allowed) */}
                 {isHost && currentRoom.allowRecording && (
                   <button
                     onClick={handleRecording}
+                    title={isRecording ? "Stop Recording" : "Start Recording"}
                     className={`p-3 rounded-xl transition-all border ${
                       isRecording
-                        ? "bg-red-500/15 text-red-400 border-red-500/25 animate-pulse"
-                        : "bg-white/5 text-surface-400 hover:text-red-400 border border-white/10"
+                        ? "bg-red-50 text-red-600 border-red-200 animate-pulse"
+                        : "bg-surface-card text-text-muted border-text-main/10 hover:text-red-600 hover:border-red-200"
                     }`}
-                    title={isRecording ? "Stop Recording" : "Start Recording"}
                   >
                     {isRecording ? (
                       <RiStopCircleLine size={20} />
@@ -494,13 +469,11 @@ const RoomPage = () => {
           </div>
         </div>
 
-        {/* Chat Sidebar Panel */}
+        {/* Chat sidebar */}
         {isChatOpen && <RoomChat roomId={roomId} />}
       </div>
 
-      {/* ------------------------------------------------------------------ */}
-      {/* Modals & Overlays */}
-      {/* ------------------------------------------------------------------ */}
+      {/* Modals */}
       {showSettings && (
         <RoomSettings
           room={currentRoom}
@@ -508,7 +481,6 @@ const RoomPage = () => {
           isHost={isHost}
         />
       )}
-
       {selectedParticipant && (
         <ParticipantMenu
           participant={selectedParticipant}

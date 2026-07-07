@@ -5,12 +5,15 @@ import tailwindcss from "@tailwindcss/vite";
 // https://vite.dev/config/
 export default defineConfig({
   server: {
+    port: 5173,
     proxy: {
-      // Directs any request starting with /api to the backend target
       "/api/v1": {
-        target: "http://localhost:5000/api/v1", // Your backend URL
+        target: "http://localhost:5000",
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ""), // Optional: strips /api from the URL
+      },
+      "/uploads": {
+        target: "http://localhost:5000",
+        changeOrigin: true,
       },
     },
   },

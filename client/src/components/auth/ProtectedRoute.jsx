@@ -5,15 +5,15 @@ const ProtectedRoute = ({ children, requireProfile = true }) => {
   const { isAuthenticated, isProfileComplete, token } = useSelector(
     (s) => s.auth,
   );
-
-  console.log(isAuthenticated, isProfileComplete, token);
   const location = useLocation();
 
+  // Not logged in at all
   if (!isAuthenticated && !token) {
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
-  if (requireProfile && !isProfileComplete) {
+  // Logged in but profile incomplete — redirect to onboarding
+  if (requireProfile && token && isAuthenticated && !isProfileComplete) {
     return <Navigate to="/onboarding" replace />;
   }
 
